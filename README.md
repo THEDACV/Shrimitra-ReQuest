@@ -27,7 +27,7 @@ A lightweight, all-in-one API testing tool with Postman-like features, built wit
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/shrimitra-request.git
+git clone https://github.com/THEDACV/shrimitra-request.git
 cd shrimitra-request
 
 # Install dependencies
@@ -35,3 +35,8 @@ pip install fastapi uvicorn httpx
 
 # Run the server
 uvicorn app:app --reload
+
+Made with ❤️ by Chaithanya Vishwamitra D A
+Chief Technical Officer
+Shrimitra Networks
+
