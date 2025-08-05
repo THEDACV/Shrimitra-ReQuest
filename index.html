@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shrimitra ReQuest - Real-time API Testing Tool</title>
+    <style>
+      :root {
+        --primary-color: #6c5ce7;
+        --secondary-color: #a29bfe;
+        --text-color: #2d3436;
+        --bg-color: #f5f6fa;
+        --card-color: #ffffff;
+        --border-color: #dfe6e9;
+        --success-color: #00b894;
+        --error-color: #d63031;
+        --warning-color: #fdcb6e;
+        --info-color: #0984e3;
+      }
+
+      .dark-mode {
+        --primary-color: #a29bfe;
+        --secondary-color: #6c5ce7;
+        --text-color: #f5f6fa;
+        --bg-color: #2d3436;
+        --card-color: #1e272e;
+        --border-color: #636e72;
+        --success-color: #55efc4;
+        --error-color: #ff7675;
+        --warning-color: #ffeaa7;
+        --info-color: #74b9ff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .primary-btn {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .primary-btn:hover {
+        background-color: var(--secondary-color);
+      }
+
+      .secondary-btn {
+        background-color: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+      }
+
+      .secondary-btn:hover {
+        background-color: var(--border-color);
+      }
+
+      .icon-btn {
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        width: 250px;
+        background-color: var(--card-color);
+        border-right: 1px solid var(--border-color);
+        padding: 1rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sidebar-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .history-item {
+        padding: 0.75rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        border-left: 3px solid transparent;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .history-item:hover {
+        background-color: var(--border-color);
+      }
+
+      .history-item.active {
+        border-left: 3px solid var(--primary-color);
+        background-color: var(--border-color);
+      }
+
+      .history-method {
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+      }
+
+      .history-url {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.8rem;
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .request-panel {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .request-controls {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .method-select {
+        padding: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-color);
+        color: var(--text-color);
+        min-width: 100px;
+      }
+
+      .url-input {
+        flex: 1;
+        padding: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background-color: var(--card-color);
+        color: var(--text-color);
+      }
+
+      .send-btn {
+        background-color: var(--success-color);
+        color: white;
+      }
+
+      .send-btn:hover {
+        opacity: 0.9;
+      }
+
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .tab {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+      }
+
+      .tab.active {
+        border-bottom: 2px solid var(--primary-color);
+        font-weight: 600;
+      }
+
+      .tab-content {
+        display: none;
+        padding: 1rem 0;
+        height: 200px;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .headers-table,
+      .params-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .headers-table th,
+      .params-table th {
+        text-align: left;
+        padding: 0.5rem;
+        background-color: var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      .headers-table td,
+      .params-table td {
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .headers-table input,
+      .params-table input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--card-color);
+        color: var(--text-color);
+      }
+
+      .add-row-btn {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .body-editor {
+        width: 100%;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.5rem;
+        background-color: var(--card-color);
+        color: var(--text-color);
+        font-family: monospace;
+        resize: none;
+      }
+
+      .response-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: 1rem;
+      }
+
+      .response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .status-code {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .status-2xx {
+        background-color: rgba(0, 184, 148, 0.2);
+        color: var(--success-color);
+      }
+
+      .status-4xx,
+      .status-5xx {
+        background-color: rgba(214, 48, 49, 0.2);
+        color: var(--error-color);
+      }
+
+      .status-3xx {
+        background-color: rgba(253, 203, 110, 0.2);
+        color: var(--warning-color);
+      }
+
+      .response-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .response-content {
+        flex: 1;
+        overflow: auto;
+        padding: 1rem 0;
+      }
+
+      .response-body {
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        overflow-x: auto;
+      }
+
+      .response-headers {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .response-headers th {
+        text-align: left;
+        padding: 0.5rem;
+        background-color: var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      .response-headers td {
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--border-color);
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .empty-state p {
+        margin-top: 1rem;
+        max-width: 300px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 1rem;
+        border-radius: 4px;
+        background-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          height: 200px;
+        }
+
+        .request-controls {
+          flex-direction: column;
+        }
+
+        .url-input {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 9h16"></path>
+          <path d="M4 15h16"></path>
+          <path d="M10 3L8 21"></path>
+          <path d="M16 3l-2 18"></path>
+        </svg>
+        <span>Shrimitra ReQuest</span>
+      </div>
+      <div class="controls">
+        <button
+          class="icon-btn secondary-btn"
+          id="ai-assistant-btn"
+          title="AI Assistant (Coming Soon)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 8V4H8"></path>
+            <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+            <path d="M2 14h2"></path>
+            <path d="M20 14h2"></path>
+            <path d="M15 13v2"></path>
+            <path d="M9 13v2"></path>
+          </svg>
+        </button>
+        <button
+          class="icon-btn secondary-btn"
+          id="voice-btn"
+          title="Voice Input (Coming Soon)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+            ></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
+        <button
+          class="icon-btn secondary-btn"
+          id="theme-toggle"
+          title="Toggle Dark Mode"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">History</div>
+          <button class="secondary-btn" id="clear-history-btn">Clear</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+
+      <div class="main-content">
+        <div class="request-panel">
+          <div class="request-controls">
+            <select class="method-select" id="method-select">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+              <option value="HEAD">HEAD</option>
+              <option value="OPTIONS">OPTIONS</option>
+            </select>
+            <input
+              type="text"
+              class="url-input"
+              id="url-input"
+              placeholder="https://api.example.com/endpoint"
+            />
+            <button class="primary-btn send-btn" id="send-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              Send
+            </button>
+          </div>
+
+          <div class="tabs">
+            <div class="tab active" data-tab="params">Params</div>
+            <div class="tab" data-tab="headers">Headers</div>
+            <div class="tab" data-tab="body">Body</div>
+          </div>
+
+          <div class="tab-content active" id="params-tab">
+            <table class="params-table" id="params-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="text" placeholder="param1" /></td>
+                  <td><input type="text" placeholder="value1" /></td>
+                  <td><input type="text" placeholder="description" /></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="secondary-btn add-row-btn" id="add-param-btn">
+              + Add Param
+            </button>
+          </div>
+
+          <div class="tab-content" id="headers-tab">
+            <table class="headers-table" id="headers-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th>Description</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="text" placeholder="Content-Type" /></td>
+                  <td><input type="text" placeholder="application/json" /></td>
+                  <td><input type="text" placeholder="description" /></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="secondary-btn add-row-btn" id="add-header-btn">
+              + Add Header
+            </button>
+          </div>
+
+          <div class="tab-content" id="body-tab">
+            <textarea
+              class="body-editor"
+              id="body-editor"
+              placeholder='{"key": "value"}'
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="response-panel">
+          <div class="response-header">
+            <div id="response-status"></div>
+            <div class="controls">
+              <button class="secondary-btn" id="download-btn">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
+              </button>
+            </div>
+          </div>
+
+          <div class="response-tabs">
+            <div class="tab active" data-response-tab="body">Body</div>
+            <div class="tab" data-response-tab="headers">Headers</div>
+          </div>
+
+          <div class="response-content">
+            <div id="response-body" class="response-body"></div>
+            <table class="response-headers" id="response-headers">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // DOM Elements
+        const methodSelect = document.getElementById("method-select");
+        const urlInput = document.getElementById("url-input");
+        const sendBtn = document.getElementById("send-btn");
+        const paramsTab = document.getElementById("params-tab");
+        const headersTab = document.getElementById("headers-tab");
+        const bodyTab = document.getElementById("body-tab");
+        const tabs = document.querySelectorAll(".tab");
+        const responseTabs = document.querySelectorAll(
+          ".tab[data-response-tab]"
+        );
+        const responseBody = document.getElementById("response-body");
+        const responseHeaders = document
+          .getElementById("response-headers")
+          .querySelector("tbody");
+        const responseStatus = document.getElementById("response-status");
+        const historyList = document.getElementById("history-list");
+        const clearHistoryBtn = document.getElementById("clear-history-btn");
+        const addParamBtn = document.getElementById("add-param-btn");
+        const addHeaderBtn = document.getElementById("add-header-btn");
+        const paramsTable = document
+          .getElementById("params-table")
+          .querySelector("tbody");
+        const headersTable = document
+          .getElementById("headers-table")
+          .querySelector("tbody");
+        const bodyEditor = document.getElementById("body-editor");
+        const downloadBtn = document.getElementById("download-btn");
+        const themeToggle = document.getElementById("theme-toggle");
+        const toast = document.getElementById("toast");
+        const aiAssistantBtn = document.getElementById("ai-assistant-btn");
+        const voiceBtn = document.getElementById("voice-btn");
+
+        // State
+        let history = JSON.parse(localStorage.getItem("apiHistory")) || [];
+        let isDarkMode = localStorage.getItem("darkMode") === "true";
+
+        // Initialize
+        updateTheme();
+        renderHistory();
+        setupEventListeners();
+
+        function setupEventListeners() {
+          // Tab switching
+          tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+              tabs.forEach((t) => t.classList.remove("active"));
+              tab.classList.add("active");
+
+              document.querySelectorAll(".tab-content").forEach((content) => {
+                content.classList.remove("active");
+              });
+
+              document
+                .getElementById(`${tab.dataset.tab}-tab`)
+                .classList.add("active");
+            });
+          });
+
+          // Response tab switching
+          responseTabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+              responseTabs.forEach((t) => t.classList.remove("active"));
+              tab.classList.add("active");
+
+              if (tab.dataset.responseTab === "body") {
+                responseBody.style.display = "block";
+                document.getElementById("response-headers").style.display =
+                  "none";
+              } else {
+                responseBody.style.display = "none";
+                document.getElementById("response-headers").style.display =
+                  "block";
+              }
+            });
+          });
+
+          // Send request
+          sendBtn.addEventListener("click", sendRequest);
+          urlInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendRequest();
+          });
+
+          // History
+          clearHistoryBtn.addEventListener("click", clearHistory);
+
+          // Add rows to tables
+          addParamBtn.addEventListener("click", () => addTableRow(paramsTable));
+          addHeaderBtn.addEventListener("click", () =>
+            addTableRow(headersTable)
+          );
+
+          // Download response
+          downloadBtn.addEventListener("click", downloadResponse);
+
+          // Theme toggle
+          themeToggle.addEventListener("click", toggleTheme);
+
+          // AI Assistant placeholder
+          aiAssistantBtn.addEventListener("click", () => {
+            showToast("AI Assistant feature coming soon!");
+          });
+
+          // Voice input placeholder
+          voiceBtn.addEventListener("click", () => {
+            showToast("Voice input feature coming soon!");
+          });
+
+          // Handle clicks on history items
+          historyList.addEventListener("click", (e) => {
+            const historyItem = e.target.closest(".history-item");
+            if (!historyItem) return;
+
+            const id = historyItem.dataset.id;
+            const request = history.find((item) => item.id === id);
+            if (request) {
+              loadRequest(request);
+            }
+          });
+        }
+
+        function addTableRow(table) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                    <td><input type="text" placeholder="key"></td>
+                    <td><input type="text" placeholder="value"></td>
+                    <td><input type="text" placeholder="description"></td>
+                    <td><button class="icon-btn secondary-btn delete-row-btn">×</button></td>
+                `;
+          table.appendChild(row);
+
+          // Add event listener to delete button
+          row.querySelector(".delete-row-btn").addEventListener("click", () => {
+            row.remove();
+          });
+        }
+
+        async function sendRequest() {
+          const method = methodSelect.value;
+          let url = urlInput.value.trim();
+
+          if (!url) {
+            showToast("Please enter a URL");
+            return;
+          }
+
+          // Add protocol if missing
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+            urlInput.value = url;
+          }
+
+          // Get params
+          const params = {};
+          const paramRows = paramsTable.querySelectorAll("tr");
+          paramRows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            if (inputs[0].value.trim()) {
+              params[inputs[0].value.trim()] = inputs[1].value.trim();
+            }
+          });
+
+          // Add params to URL if GET request
+          if (method === "GET" && Object.keys(params).length > 0) {
+            const urlObj = new URL(url);
+            Object.keys(params).forEach((key) => {
+              urlObj.searchParams.append(key, params[key]);
+            });
+            url = urlObj.toString();
+            urlInput.value = url;
+          }
+
+          // Get headers
+          const headers = {};
+          const headerRows = headersTable.querySelectorAll("tr");
+          headerRows.forEach((row) => {
+            const inputs = row.querySelectorAll("input");
+            if (inputs[0].value.trim()) {
+              headers[inputs[0].value.trim()] = inputs[1].value.trim();
+            }
+          });
+
+          // Get body
+          let body = null;
+          if (method !== "GET" && method !== "HEAD") {
+            try {
+              body = bodyEditor.value.trim()
+                ? JSON.parse(bodyEditor.value.trim())
+                : null;
+            } catch (e) {
+              showToast("Invalid JSON body");
+              return;
+            }
+          }
+
+          const requestData = {
+            method,
+            url,
+            headers,
+            body,
+          };
+
+          try {
+            showToast("Sending request...");
+
+            // Check if backend is available
+            let response;
+            try {
+              response = await fetch("/send-request", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(requestData),
+              });
+            } catch (err) {
+              // If backend is down, use direct fetch
+              console.warn("Backend unavailable, falling back to direct fetch");
+              response = await directFetch(requestData);
+            }
+
+            const responseData = await response.json();
+
+            // Display response
+            displayResponse(responseData);
+
+            // Save to history
+            saveToHistory(requestData, responseData);
+
+            showToast("Request completed");
+          } catch (error) {
+            console.error("Error:", error);
+            showToast("Request failed: " + error.message);
+
+            // Display error response
+            displayResponse({
+              status: 0,
+              headers: {},
+              body: {
+                error: error.message,
+              },
+            });
+          }
+        }
+
+        async function directFetch(requestData) {
+          try {
+            const { method, url, headers, body } = requestData;
+
+            const response = await fetch(url, {
+              method,
+              headers,
+              body: body ? JSON.stringify(body) : null,
+            });
+
+            const responseHeaders = {};
+            response.headers.forEach((value, key) => {
+              responseHeaders[key] = value;
+            });
+
+            let responseBody;
+            try {
+              responseBody = await response.json();
+            } catch {
+              responseBody = await response.text();
+            }
+
+            // Create a mock response that matches our backend format
+            return new Response(
+              JSON.stringify({
+                status: response.status,
+                headers: responseHeaders,
+                body: responseBody,
+              }),
+              {
+                status: 200,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+          } catch (error) {
+            // Return error response
+            return new Response(
+              JSON.stringify({
+                status: 0,
+                headers: {},
+                body: {
+                  error: error.message,
+                },
+              }),
+              {
+                status: 200,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+          }
+        }
+
+        function displayResponse(response) {
+          // Status code
+          responseStatus.innerHTML = "";
+          if (response.status) {
+            const statusClass = getStatusCodeClass(response.status);
+            const statusElement = document.createElement("div");
+            statusElement.className = `status-code ${statusClass}`;
+            statusElement.textContent = `${response.status} ${getStatusText(
+              response.status
+            )}`;
+            responseStatus.appendChild(statusElement);
+          }
+
+          // Headers
+          responseHeaders.innerHTML = "";
+          if (response.headers) {
+            Object.entries(response.headers).forEach(([key, value]) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                            <td>${key}</td>
+                            <td>${value}</td>
+                        `;
+              responseHeaders.appendChild(row);
+            });
+          }
+
+          // Body
+          responseBody.textContent =
+            typeof response.body === "string"
+              ? response.body
+              : JSON.stringify(response.body, null, 2);
+
+          // Show body tab by default
+          document
+            .querySelector('.tab[data-response-tab="body"]')
+            .classList.add("active");
+          document
+            .querySelector('.tab[data-response-tab="headers"]')
+            .classList.remove("active");
+          responseBody.style.display = "block";
+          document.getElementById("response-headers").style.display = "none";
+        }
+
+        function getStatusCodeClass(status) {
+          if (status >= 200 && status < 300) return "status-2xx";
+          if (status >= 300 && status < 400) return "status-3xx";
+          if (status >= 400 && status < 500) return "status-4xx";
+          if (status >= 500) return "status-5xx";
+          return "";
+        }
+
+        function getStatusText(status) {
+          const statusTexts = {
+            200: "OK",
+            201: "Created",
+            204: "No Content",
+            301: "Moved Permanently",
+            302: "Found",
+            304: "Not Modified",
+            400: "Bad Request",
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "Not Found",
+            405: "Method Not Allowed",
+            500: "Internal Server Error",
+            502: "Bad Gateway",
+            503: "Service Unavailable",
+          };
+          return statusTexts[status] || "";
+        }
+
+        function saveToHistory(request, response) {
+          const historyItem = {
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            method: request.method,
+            url: request.url,
+            request: {
+              headers: request.headers,
+              body: request.body,
+            },
+            response: {
+              status: response.status,
+              headers: response.headers,
+              body: response.body,
+            },
+          };
+
+          history.unshift(historyItem);
+          if (history.length > 50) history.pop(); // Limit history
+
+          localStorage.setItem("apiHistory", JSON.stringify(history));
+          renderHistory();
+        }
+
+        function renderHistory() {
+          historyList.innerHTML = "";
+
+          if (history.length === 0) {
+            historyList.innerHTML =
+              '<div class="empty-state"><p>No requests yet</p></div>';
+            return;
+          }
+
+          history.forEach((item) => {
+            const historyItem = document.createElement("div");
+            historyItem.className = "history-item";
+            historyItem.dataset.id = item.id;
+
+            historyItem.innerHTML = `
+                        <div class="history-method" style="color: ${getMethodColor(
+                          item.method
+                        )}">${item.method}</div>
+                        <div class="history-url">${item.url}</div>
+                        <div style="font-size: 0.7rem; color: var(--border-color);">${new Date(
+                          item.timestamp
+                        ).toLocaleString()}</div>
+                    `;
+
+            historyList.appendChild(historyItem);
+          });
+        }
+
+        function getMethodColor(method) {
+          const colors = {
+            GET: "var(--success-color)",
+            POST: "var(--info-color)",
+            PUT: "var(--warning-color)",
+            PATCH: "var(--warning-color)",
+            DELETE: "var(--error-color)",
+            HEAD: "var(--secondary-color)",
+            OPTIONS: "var(--secondary-color)",
+          };
+          return colors[method] || "var(--text-color)";
+        }
+
+        function clearHistory() {
+          if (confirm("Are you sure you want to clear all history?")) {
+            history = [];
+            localStorage.removeItem("apiHistory");
+            renderHistory();
+
+            // Also clear from backend if available
+            fetch("/history", { method: "DELETE" }).catch((err) =>
+              console.log("Backend unavailable, skipping history clear")
+            );
+          }
+        }
+
+        function loadRequest(request) {
+          methodSelect.value = request.method;
+          urlInput.value = request.url;
+
+          // Load headers
+          headersTable.innerHTML = "";
+          if (request.request.headers) {
+            Object.entries(request.request.headers).forEach(([key, value]) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                            <td><input type="text" value="${key}"></td>
+                            <td><input type="text" value="${value}"></td>
+                            <td><input type="text" placeholder="description"></td>
+                            <td><button class="icon-btn secondary-btn delete-row-btn">×</button></td>
+                        `;
+              headersTable.appendChild(row);
+
+              // Add event listener to delete button
+              row
+                .querySelector(".delete-row-btn")
+                .addEventListener("click", () => {
+                  row.remove();
+                });
+            });
+          }
+
+          // Add empty row if no headers
+          if (headersTable.querySelectorAll("tr").length === 0) {
+            addTableRow(headersTable);
+          }
+
+          // Load params
+          paramsTable.innerHTML = "";
+          try {
+            const urlObj = new URL(request.url);
+            urlObj.searchParams.forEach((value, key) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                            <td><input type="text" value="${key}"></td>
+                            <td><input type="text" value="${value}"></td>
+                            <td><input type="text" placeholder="description"></td>
+                            <td><button class="icon-btn secondary-btn delete-row-btn">×</button></td>
+                        `;
+              paramsTable.appendChild(row);
+
+              // Add event listener to delete button
+              row
+                .querySelector(".delete-row-btn")
+                .addEventListener("click", () => {
+                  row.remove();
+                });
+            });
+          } catch (e) {
+            console.error("Error parsing URL:", e);
+          }
+
+          // Add empty row if no params
+          if (paramsTable.querySelectorAll("tr").length === 0) {
+            addTableRow(paramsTable);
+          }
+
+          // Load body
+          bodyEditor.value = request.request.body
+            ? JSON.stringify(request.request.body, null, 2)
+            : "";
+
+          // Display response
+          if (request.response) {
+            displayResponse(request.response);
+          }
+        }
+
+        function downloadResponse() {
+          const response = {
+            status: responseStatus.textContent,
+            headers: {},
+            body: responseBody.textContent,
+          };
+
+          // Get headers from table
+          const headerRows = responseHeaders.querySelectorAll("tr");
+          headerRows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length >= 2) {
+              response.headers[cells[0].textContent] = cells[1].textContent;
+            }
+          });
+
+          const data = JSON.stringify(response, null, 2);
+          const blob = new Blob([data], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `api-response-${new Date().toISOString()}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+
+        function toggleTheme() {
+          isDarkMode = !isDarkMode;
+          localStorage.setItem("darkMode", isDarkMode);
+          updateTheme();
+        }
+
+        function updateTheme() {
+          if (isDarkMode) {
+            document.body.classList.add("dark-mode");
+          } else {
+            document.body.classList.remove("dark-mode");
+          }
+        }
+
+        function showToast(message) {
+          toast.textContent = message;
+          toast.classList.add("show");
+
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 3000);
+        }
+
+        // Initialize response area
+        responseBody.textContent = "Send a request to see the response here";
+      });
+    </script>
+  </body>
+</html>
